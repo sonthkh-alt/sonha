@@ -1,3 +1,4 @@
+
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { Paper, Dissertation, ContactInfo, ProfessionalActivity } from '../types';
 
@@ -44,9 +45,9 @@ const INITIAL_AVATAR_URL = "https://picsum.photos/300/300?grayscale";
 
 const INITIAL_CONTACT_INFO: ContactInfo = {
     workplace: "Văn phòng Đoàn ĐBQH và HĐND tỉnh Thanh Hóa",
-    address: "Số 35, Đại lộ Lê Lợi, Phường Hạch Thành, Tỉnh Thanh Hóa",
-    email: "sonhn@thanhhoa.gov.vn",
-    phone: "(+84) 904818886 (Vui lòng chỉ liên hệ trong giờ hành chính)",
+    address: "Số 01, Đại lộ Lê Lợi, Phường Lam Sơn, TP. Thanh Hóa, Tỉnh Thanh Hóa",
+    email: "son.hn@thanhhoa.gov.vn",
+    phone: "(+84) 123 456 789 (Vui lòng chỉ liên hệ trong giờ hành chính)",
     mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3751.579626359424!2d105.77421881538309!3d19.80550478665091!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3136f81dd1aaaaab%3A0x4858cb339c4a851d!2zVMOyYSBuaMOgIEjhu5lpIMSR4buTbmcgTmjDom4gZMJuIFThu4luaCBUaGFuaCBIRCVDMyVCM2E!5e0!3m2!1svi!2s!4v1689234567890!5m2!1svi!2s"
 };
 
