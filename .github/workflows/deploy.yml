@@ -4,7 +4,7 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches:
-      - main # Lắng nghe các thay đổi trên nhánh main
+      - main # Lắng nghe các thay đổi trên nhánh main 1
   workflow_dispatch: # Cho phép chạy thủ công từ tab Actions
 
 permissions:
