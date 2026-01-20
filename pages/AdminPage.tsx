@@ -339,7 +339,7 @@ const PaperForm: React.FC<{ paper: Paper; onSave: (paper: Paper) => void; onCanc
         if (e.target.files && e.target.files[0]) {
            // In a real app, this would upload to a server and return a URL.
            // Here, we just use the file name as a placeholder.
-           setFormData(prev => ({ ...prev, fileUrl: `/uploads/${e.target.files![0].name}` }));
+           setFormData(prev => ({ ...prev, fileUrl: `./${e.target.files![0].name}` }));
         }
     };
 
