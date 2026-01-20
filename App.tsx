@@ -11,18 +11,22 @@ import { Page } from './types';
 
 const AppContent: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<Page>('home');
-    const { bio, dissertation, papers, isLoggedIn, login, logout, updateBio, updateDissertation, setPapers, restoreData } = usePortfolioData();
+    const { 
+        bio, dissertation, papers, isLoggedIn, login, logout, updateBio, 
+        updateDissertation, setPapers, restoreData, avatarUrl, contactInfo, 
+        professionalActivities, updateAvatarUrl, updateContactInfo, setProfessionalActivities 
+    } = usePortfolioData();
 
     const renderPage = () => {
         switch (currentPage) {
             case 'home':
-                return <HomePage bio={bio} />;
+                return <HomePage bio={bio} avatarUrl={avatarUrl} professionalActivities={professionalActivities} />;
             case 'dissertation':
                 return <DissertationPage dissertation={dissertation} />;
             case 'research':
                 return <ResearchPage papers={papers} />;
             case 'contact':
-                return <ContactPage />;
+                return <ContactPage contactInfo={contactInfo} />;
             case 'admin':
                 return <AdminPage 
                             isLoggedIn={isLoggedIn} 
@@ -35,9 +39,15 @@ const AppContent: React.FC = () => {
                             papers={papers}
                             setPapers={setPapers}
                             restoreData={restoreData}
+                            avatarUrl={avatarUrl}
+                            updateAvatarUrl={updateAvatarUrl}
+                            contactInfo={contactInfo}
+                            updateContactInfo={updateContactInfo}
+                            professionalActivities={professionalActivities}
+                            setProfessionalActivities={setProfessionalActivities}
                         />;
             default:
-                return <HomePage bio={bio} />;
+                return <HomePage bio={bio} avatarUrl={avatarUrl} professionalActivities={professionalActivities} />;
         }
     };
 

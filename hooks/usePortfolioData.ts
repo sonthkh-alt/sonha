@@ -1,8 +1,11 @@
 
-import React, { createContext, useState, useContext, ReactNode, useCallback } from 'react';
-import { Paper, Dissertation } from '../types';
+import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
+import { Paper, Dissertation, ContactInfo, ProfessionalActivity } from '../types';
 
-// --- Initial Data ---
+// --- Storage Key ---
+const STORAGE_KEY = 'portfolioData_tsHaNgocSon';
+
+// --- Initial Data (Defaults for the very first visit) ---
 const INITIAL_BIO = "TS. Hà Ngọc Sơn là một nhà lãnh đạo và chuyên gia uyên bác trong lĩnh vực Quản lý Kinh tế. Với học vị Tiến sĩ, ông hiện đang giữ chức vụ Phó Chánh Văn phòng Đoàn Đại biểu Quốc hội và Hội đồng Nhân dân tỉnh Thanh Hóa. Ông có niềm đam mê sâu sắc với việc phát triển kinh tế biển bền vững, đặc biệt là tại quê hương Thanh Hóa, nơi ông đã và đang cống hiến trí tuệ và tâm huyết của mình.";
 
 const INITIAL_DISSERTATION: Dissertation = {
@@ -38,6 +41,34 @@ const INITIAL_PAPERS: Paper[] = [
   },
 ];
 
+const INITIAL_AVATAR_URL = "https://picsum.photos/300/300?grayscale";
+
+const INITIAL_CONTACT_INFO: ContactInfo = {
+    workplace: "Văn phòng Đoàn ĐBQH và HĐND tỉnh Thanh Hóa",
+    address: "Số 01, Đại lộ Lê Lợi, Phường Lam Sơn, TP. Thanh Hóa, Tỉnh Thanh Hóa",
+    email: "son.hn@thanhhoa.gov.vn",
+    phone: "(+84) 123 456 789 (Vui lòng chỉ liên hệ trong giờ hành chính)",
+    mapUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3751.579626359424!2d105.77421881538309!3d19.80550478665091!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3136f81dd1aaaaab%3A0x4858cb339c4a851d!2zVMOyYSBuaMOgIEjhu5lpIMSR4buTbmcgTmjDom4gZMJuIFThu4luaCBUaGFuaCBIRCVDMyVCM2E!5e0!3m2!1svi!2s!4v1689234567890!5m2!1svi!2s"
+};
+
+const INITIAL_ACTIVITIES: ProfessionalActivity[] = [
+    {
+        id: '1',
+        title: "Tư vấn chính sách",
+        description: "Tham gia tư vấn cho các cơ quan địa phương về chiến lược phát triển kinh tế - xã hội."
+    },
+    {
+        id: '2',
+        title: "Hội thảo khoa học",
+        description: "Trình bày báo cáo tại các hội thảo khoa học trong nước và quốc tế."
+    },
+    {
+        id: '3',
+        title: "Giảng dạy & Hướng dẫn",
+        description: "Thỉnh giảng tại các trường đại học và hướng dẫn sinh viên, học viên cao học."
+    }
+];
+
 
 // --- Context Definition ---
 interface DataContextType {
@@ -50,17 +81,59 @@ interface DataContextType {
     updateBio: (newBio: string) => void;
     updateDissertation: (newDissertation: Dissertation) => void;
     setPapers: React.Dispatch<React.SetStateAction<Paper[]>>;
-    restoreData: (data: { bio: string; dissertation: Dissertation; papers: Paper[] }) => void;
+    avatarUrl: string;
+    contactInfo: ContactInfo;
+    professionalActivities: ProfessionalActivity[];
+    updateAvatarUrl: (newUrl: string) => void;
+    updateContactInfo: (newInfo: ContactInfo) => void;
+    setProfessionalActivities: React.Dispatch<React.SetStateAction<ProfessionalActivity[]>>;
+    restoreData: (data: any) => void;
 }
 
 const DataContext = createContext<DataContextType | undefined>(undefined);
 
 // --- Provider Component ---
 export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-    const [bio, setBio] = useState<string>(INITIAL_BIO);
-    const [dissertation, setDissertation] = useState<Dissertation>(INITIAL_DISSERTATION);
-    const [papers, setPapers] = useState<Paper[]>(INITIAL_PAPERS);
+    // Helper function to load initial state from localStorage or use defaults
+    const loadState = <T,>(key: string, defaultValue: T): T => {
+        try {
+            const savedItem = localStorage.getItem(STORAGE_KEY);
+            if (savedItem) {
+                const parsedData = JSON.parse(savedItem);
+                return parsedData[key] ?? defaultValue;
+            }
+        } catch (error) {
+            console.error(`Error reading ${key} from localStorage`, error);
+        }
+        return defaultValue;
+    };
+
+    const [bio, setBio] = useState<string>(() => loadState('bio', INITIAL_BIO));
+    const [dissertation, setDissertation] = useState<Dissertation>(() => loadState('dissertation', INITIAL_DISSERTATION));
+    const [papers, setPapers] = useState<Paper[]>(() => loadState('papers', INITIAL_PAPERS));
+    const [avatarUrl, setAvatarUrl] = useState<string>(() => loadState('avatarUrl', INITIAL_AVATAR_URL));
+    const [contactInfo, setContactInfo] = useState<ContactInfo>(() => loadState('contactInfo', INITIAL_CONTACT_INFO));
+    const [professionalActivities, setProfessionalActivities] = useState<ProfessionalActivity[]>(() => loadState('professionalActivities', INITIAL_ACTIVITIES));
+    
     const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+    // Effect to save all data to localStorage whenever any piece of it changes
+    useEffect(() => {
+        try {
+            const dataToSave = {
+                bio,
+                dissertation,
+                papers,
+                avatarUrl,
+                contactInfo,
+                professionalActivities,
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        } catch (error) {
+            console.error("Error saving data to localStorage", error);
+        }
+    }, [bio, dissertation, papers, avatarUrl, contactInfo, professionalActivities]);
+
 
     const login = useCallback((password: string) => {
         if (password === 'admin') {
@@ -76,11 +149,16 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
     const updateBio = (newBio: string) => setBio(newBio);
     const updateDissertation = (newDissertation: Dissertation) => setDissertation(newDissertation);
+    const updateAvatarUrl = (newUrl: string) => setAvatarUrl(newUrl);
+    const updateContactInfo = (newInfo: ContactInfo) => setContactInfo(newInfo);
     
-    const restoreData = useCallback((data: { bio: string; dissertation: Dissertation; papers: Paper[] }) => {
+    const restoreData = useCallback((data: any) => {
         if (data.bio) setBio(data.bio);
         if (data.dissertation) setDissertation(data.dissertation);
         if (data.papers) setPapers(data.papers);
+        if (data.avatarUrl) setAvatarUrl(data.avatarUrl);
+        if (data.contactInfo) setContactInfo(data.contactInfo);
+        if (data.professionalActivities) setProfessionalActivities(data.professionalActivities);
     }, []);
 
 
@@ -94,10 +172,15 @@ export const DataProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         updateBio,
         updateDissertation,
         setPapers,
+        avatarUrl,
+        contactInfo,
+        professionalActivities,
+        updateAvatarUrl,
+        updateContactInfo,
+        setProfessionalActivities,
         restoreData
     };
-
-    // FIX: Replaced JSX with React.createElement to resolve parsing errors. The file has a .ts extension but contains JSX, which causes compilation errors. Using React.createElement is the equivalent and works in a .ts file.
+    
     return React.createElement(DataContext.Provider, { value }, children);
 };
 

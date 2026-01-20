@@ -1,7 +1,10 @@
 import React from 'react';
+import { ProfessionalActivity } from '../types';
 
 interface HomePageProps {
     bio: string;
+    avatarUrl: string;
+    professionalActivities: ProfessionalActivity[];
 }
 
 // A reusable card for sections
@@ -18,7 +21,7 @@ const InfoCard: React.FC<{ title: string; children: React.ReactNode; icon: strin
 );
 
 
-const HomePage: React.FC<HomePageProps> = ({ bio }) => {
+const HomePage: React.FC<HomePageProps> = ({ bio, avatarUrl, professionalActivities }) => {
     return (
         <div className="space-y-12">
             {/* --- Section 1: Profile Intro --- */}
@@ -26,7 +29,7 @@ const HomePage: React.FC<HomePageProps> = ({ bio }) => {
                 <div className="flex flex-col md:flex-row items-center gap-8">
                     <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden shadow-lg border-4 border-gray-500 flex-shrink-0">
                         <img 
-                            src="https://picsum.photos/300/300?grayscale" 
+                            src={avatarUrl} 
                             alt="TS. Hà Ngọc Sơn" 
                             className="w-full h-full object-cover"
                         />
@@ -78,18 +81,12 @@ const HomePage: React.FC<HomePageProps> = ({ bio }) => {
             {/* --- Section 4: Professional Activities --- */}
              <InfoCard title="Hoạt động chuyên môn" icon="🌐">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                    <div className="bg-gray-700/50 p-4 rounded-lg">
-                        <p className="font-semibold text-gray-200">Tư vấn chính sách</p>
-                        <p className="text-sm text-gray-400">Tham gia tư vấn cho các cơ quan địa phương về chiến lược phát triển kinh tế - xã hội.</p>
-                    </div>
-                    <div className="bg-gray-700/50 p-4 rounded-lg">
-                        <p className="font-semibold text-gray-200">Hội thảo khoa học</p>
-                         <p className="text-sm text-gray-400">Trình bày báo cáo tại các hội thảo khoa học trong nước và quốc tế.</p>
-                    </div>
-                    <div className="bg-gray-700/50 p-4 rounded-lg">
-                        <p className="font-semibold text-gray-200">Giảng dạy & Hướng dẫn</p>
-                        <p className="text-sm text-gray-400">Thỉnh giảng tại các trường đại học và hướng dẫn sinh viên, học viên cao học.</p>
-                    </div>
+                    {professionalActivities.map(activity => (
+                        <div key={activity.id} className="bg-gray-700/50 p-4 rounded-lg">
+                            <p className="font-semibold text-gray-200">{activity.title}</p>
+                            <p className="text-sm text-gray-400">{activity.description}</p>
+                        </div>
+                    ))}
                 </div>
             </InfoCard>
 

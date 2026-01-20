@@ -1,5 +1,5 @@
 import React, { useState, useRef, useCallback } from 'react';
-import { Paper, Dissertation } from '../types';
+import { Paper, Dissertation, ContactInfo, ProfessionalActivity } from '../types';
 
 // --- Reusable Components ---
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -81,17 +81,206 @@ const LoginForm: React.FC<LoginFormProps> = ({ onLogin }) => {
 };
 
 // --- Admin Dashboard Components ---
+const AvatarEditor: React.FC<{ avatarUrl: string; onSave: (newUrl: string) => void; }> = ({ avatarUrl, onSave }) => {
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result as string);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    const handleSave = () => {
+        if (previewUrl) {
+            onSave(previewUrl);
+            setPreviewUrl(null);
+            alert("Ảnh đại diện đã được cập nhật.");
+        }
+    };
+
+    return (
+        <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-gray-200">Ảnh đại diện</h3>
+            <div className="flex items-center gap-6">
+                <img src={previewUrl || avatarUrl} alt="Ảnh đại diện" className="w-32 h-32 rounded-full object-cover border-2 border-gray-600" />
+                <div className="flex-grow">
+                    <Button onClick={() => fileInputRef.current?.click()}>Chọn ảnh mới</Button>
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
+                    {previewUrl && <Button onClick={handleSave} className="ml-4">Lưu ảnh</Button>}
+                    <p className="text-sm text-gray-400 mt-2">Chọn một file ảnh (JPG, PNG,...) để làm ảnh đại diện mới.</p>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 const BioEditor: React.FC<{ bio: string; onSave: (newBio: string) => void; }> = ({ bio, onSave }) => {
     const [currentBio, setCurrentBio] = useState(bio);
+    const handleSave = () => {
+        onSave(currentBio);
+        alert('Tiểu sử đã được cập nhật.');
+    };
     return (
         <div className="space-y-4">
             <h3 className="text-xl font-semibold text-gray-200">Tiểu sử</h3>
             <Textarea value={currentBio} onChange={(e) => setCurrentBio(e.target.value)} rows={8} />
-            <Button onClick={() => onSave(currentBio)}>Lưu tiểu sử</Button>
+            <Button onClick={handleSave}>Lưu tiểu sử</Button>
         </div>
     );
 };
+
+const DissertationEditor: React.FC<{ dissertation: Dissertation; onSave: (newDissertation: Dissertation) => void; }> = ({ dissertation, onSave }) => {
+    const [formData, setFormData] = useState(dissertation);
+    const handleSave = () => {
+        onSave(formData);
+        alert('Thông tin luận án đã được cập nhật.');
+    };
+    return (
+        <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-gray-200">Luận án Tiến sĩ</h3>
+            <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300 mb-1">Tiêu đề</label>
+                <Input value={formData.title} onChange={(e) => setFormData({...formData, title: e.target.value})} />
+            </div>
+            <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-300 mb-1">Tóm tắt</label>
+                <Textarea value={formData.summary} onChange={(e) => setFormData({...formData, summary: e.target.value})} rows={8} />
+            </div>
+            <Button onClick={handleSave}>Lưu luận án</Button>
+        </div>
+    );
+};
+
+const ContactEditor: React.FC<{ contactInfo: ContactInfo; onSave: (newInfo: ContactInfo) => void; }> = ({ contactInfo, onSave }) => {
+    const [formData, setFormData] = useState(contactInfo);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
+    
+    const handleSave = () => {
+        onSave(formData);
+        alert('Thông tin liên hệ đã được cập nhật.');
+    }
+
+    return (
+        <div className="space-y-4">
+            <h3 className="text-xl font-semibold text-gray-200">Thông tin liên hệ</h3>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Nơi công tác</label>
+                    <Input name="workplace" value={formData.workplace} onChange={handleChange} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Địa chỉ</label>
+                    <Input name="address" value={formData.address} onChange={handleChange} />
+                </div>
+                <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+                    <Input name="email" type="email" value={formData.email} onChange={handleChange} />
+                </div>
+                 <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1">Điện thoại</label>
+                    <Input name="phone" value={formData.phone} onChange={handleChange} />
+                </div>
+            </div>
+            <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1">URL nhúng Google Maps</label>
+                <Textarea name="mapUrl" value={formData.mapUrl} onChange={handleChange} rows={4} />
+            </div>
+            <Button onClick={handleSave}>Lưu thông tin liên hệ</Button>
+        </div>
+    );
+};
+
+const ActivityManager: React.FC<{ activities: ProfessionalActivity[]; setActivities: React.Dispatch<React.SetStateAction<ProfessionalActivity[]>>; }> = ({ activities, setActivities }) => {
+    const [editingActivity, setEditingActivity] = useState<ProfessionalActivity | null>(null);
+    const [isCreating, setIsCreating] = useState(false);
+
+    const handleSave = (activityToSave: ProfessionalActivity) => {
+        if (isCreating) {
+            setActivities(prev => [...prev, { ...activityToSave, id: new Date().toISOString() }]);
+        } else {
+            setActivities(prev => prev.map(a => a.id === activityToSave.id ? activityToSave : a));
+        }
+        setEditingActivity(null);
+        setIsCreating(false);
+    };
+
+    const handleDelete = (id: string) => {
+        if (window.confirm('Bạn có chắc chắn muốn xóa hoạt động này không?')) {
+            setActivities(prev => prev.filter(a => a.id !== id));
+        }
+    };
+    
+    const handleAddNew = () => {
+        setIsCreating(true);
+        setEditingActivity({ id: '', title: '', description: '' });
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold text-gray-200">Quản lý Hoạt động chuyên môn</h3>
+                <Button onClick={handleAddNew}>Thêm hoạt động mới</Button>
+            </div>
+            <div className="space-y-4">
+                {activities.map(activity => (
+                    <div key={activity.id} className="bg-gray-800 p-4 rounded-md flex justify-between items-start">
+                        <div>
+                           <p className="font-bold text-gray-200">{activity.title}</p>
+                           <p className="text-sm text-gray-400">{activity.description}</p>
+                        </div>
+                        <div className="flex space-x-2 flex-shrink-0 ml-4">
+                            <Button variant="secondary" onClick={() => { setIsCreating(false); setEditingActivity(activity); }}>Sửa</Button>
+                            <Button variant="danger" onClick={() => handleDelete(activity.id)}>Xóa</Button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+            {editingActivity && <ActivityForm activity={editingActivity} onSave={handleSave} onCancel={() => setEditingActivity(null)} />}
+        </div>
+    );
+};
+
+const ActivityForm: React.FC<{ activity: ProfessionalActivity; onSave: (activity: ProfessionalActivity) => void; onCancel: () => void; }> = ({ activity, onSave, onCancel }) => {
+    const [formData, setFormData] = useState(activity);
+    
+    const handleSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        onSave(formData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+            <div className="bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-2xl border border-gray-700">
+                 <h2 className="text-2xl font-bold mb-4 text-gray-100">{activity.id ? 'Sửa hoạt động' : 'Thêm hoạt động mới'}</h2>
+                 <form onSubmit={handleSubmit} className="space-y-4">
+                    <div>
+                        <label className="block text-gray-300">Tiêu đề</label>
+                        <Input value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} required />
+                    </div>
+                    <div>
+                        <label className="block text-gray-300">Mô tả</label>
+                        <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} required />
+                    </div>
+                    <div className="flex justify-end space-x-2">
+                        <Button type="button" variant="secondary" onClick={onCancel}>Hủy</Button>
+                        <Button type="submit">Lưu</Button>
+                    </div>
+                 </form>
+            </div>
+        </div>
+    );
+}
+
 
 const PaperManager: React.FC<{ papers: Paper[]; setPapers: React.Dispatch<React.SetStateAction<Paper[]>>; }> = ({ papers, setPapers }) => {
     const [editingPaper, setEditingPaper] = useState<Paper | null>(null);
@@ -191,18 +380,21 @@ const BackupRestore: React.FC<{
     bio: string;
     dissertation: Dissertation;
     papers: Paper[];
+    avatarUrl: string;
+    contactInfo: ContactInfo;
+    professionalActivities: ProfessionalActivity[];
     restoreData: (data: any) => void;
-}> = ({ bio, dissertation, papers, restoreData }) => {
+}> = ({ bio, dissertation, papers, avatarUrl, contactInfo, professionalActivities, restoreData }) => {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleBackup = useCallback(() => {
-        const data = { bio, dissertation, papers };
+        const data = { bio, dissertation, papers, avatarUrl, contactInfo, professionalActivities };
         const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(data, null, 2))}`;
         const link = document.createElement("a");
         link.href = jsonString;
         link.download = `backup_ts_ha_ngoc_son_${new Date().toISOString().split('T')[0]}.json`;
         link.click();
-    }, [bio, dissertation, papers]);
+    }, [bio, dissertation, papers, avatarUrl, contactInfo, professionalActivities]);
 
     const handleRestoreClick = () => {
         fileInputRef.current?.click();
@@ -247,16 +439,31 @@ const BackupRestore: React.FC<{
     );
 };
 
-const AdminDashboard: React.FC<AdminPageProps> = ({ logout, bio, updateBio, dissertation, updateDissertation, papers, setPapers, restoreData }) => (
+const AdminDashboard: React.FC<AdminPageProps> = ({ 
+    logout, bio, updateBio, dissertation, updateDissertation, papers, setPapers, restoreData,
+    avatarUrl, updateAvatarUrl, contactInfo, updateContactInfo, professionalActivities, setProfessionalActivities
+}) => (
     <div className="bg-gray-900/70 p-6 md:p-10 rounded-xl shadow-2xl backdrop-blur-md border border-gray-500/30 space-y-12">
         <div className="flex justify-between items-center border-b border-gray-600 pb-4">
             <h2 className="text-3xl font-bold text-gray-100">Bảng điều khiển</h2>
             <Button variant="danger" onClick={logout}>Đăng xuất</Button>
         </div>
         
+        <AvatarEditor avatarUrl={avatarUrl} onSave={updateAvatarUrl} />
         <BioEditor bio={bio} onSave={updateBio} />
+        <DissertationEditor dissertation={dissertation} onSave={updateDissertation} />
+        <ContactEditor contactInfo={contactInfo} onSave={updateContactInfo} />
+        <ActivityManager activities={professionalActivities} setActivities={setProfessionalActivities} />
         <PaperManager papers={papers} setPapers={setPapers} />
-        <BackupRestore bio={bio} dissertation={dissertation} papers={papers} restoreData={restoreData} />
+        <BackupRestore 
+            bio={bio} 
+            dissertation={dissertation} 
+            papers={papers} 
+            avatarUrl={avatarUrl}
+            contactInfo={contactInfo}
+            professionalActivities={professionalActivities}
+            restoreData={restoreData} 
+        />
     </div>
 );
 
@@ -273,6 +480,12 @@ interface AdminPageProps {
     papers: Paper[];
     setPapers: React.Dispatch<React.SetStateAction<Paper[]>>;
     restoreData: (data: any) => void;
+    avatarUrl: string;
+    updateAvatarUrl: (newUrl: string) => void;
+    contactInfo: ContactInfo;
+    updateContactInfo: (newInfo: ContactInfo) => void;
+    professionalActivities: ProfessionalActivity[];
+    setProfessionalActivities: React.Dispatch<React.SetStateAction<ProfessionalActivity[]>>;
 }
 
 const AdminPage: React.FC<AdminPageProps> = (props) => {
