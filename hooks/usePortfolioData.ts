@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { Paper, Dissertation, ContactInfo, ProfessionalActivity } from '../types';
 
